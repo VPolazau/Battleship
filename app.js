@@ -1,5 +1,26 @@
 const inputBtn = document.querySelector('button.btn-dark')
-let cell = null
+const addShips = document.querySelector('button.btn-secondary')
+//
+//
+//
+// Class
+class Store {
+  map = {}
+
+  ArrIDs(height, width) {
+    for (let x = 0; x < height; x++) {
+      for (let y = 0; y < width; y++) {
+        this.map[`${x}${y}`] = false
+      }
+    }
+  }
+
+  get mapId() {}
+  set mapId(id) {
+    this.map[id] = true
+  }
+}
+const store = new Store()
 
 class BuildFields {
   createFields(height, width) {
@@ -18,6 +39,7 @@ class BuildFields {
 
     for (let index = 0; index < h; index++) {
       const row = document.createElement('div')
+
       row.classList.add('btn-group')
       this.createColoms(width, index).forEach(cols =>
         row.insertAdjacentElement('beforeend', cols)
@@ -26,6 +48,7 @@ class BuildFields {
       rows.push(row)
     }
 
+    addDelBtn(rows, true)
     return rows
   }
 
@@ -43,6 +66,7 @@ class BuildFields {
       svg.classList.add('far')
       svg.classList.add('fa-square')
       svg.classList.add('fa-2x')
+      svg.classList.add('clear')
 
       col.insertAdjacentElement('beforeend', svg)
       cols.push(col)
@@ -52,7 +76,14 @@ class BuildFields {
   }
 }
 const buildFields = new BuildFields()
-
+//
+//
+//
+//
+//
+//
+//
+//
 inputBtn.addEventListener('click', btnCreate)
 
 function btnCreate(e) {
@@ -65,13 +96,27 @@ function btnCreate(e) {
   }
 
   buildFields.createFields(size.height, size.width)
-  changeCell()
+  store.ArrIDs(size.height, size.width)
 }
 
-function changeCell() {
-  // let cell = document.getElementsByClassName('fa-square')
-  // console.dir(cell);
-  let battlefields = document.getElementById('battlefields')
+addShips.addEventListener('click', placementShips)
+
+function placementShips() {
+  const btnPlaced = document.querySelector('button.placed')
+
+  btnPlaced.addEventListener('click', fieldHide)
+  addShip()
+}
+
+function fieldHide() {
+  const cells = document.querySelectorAll('i.fa-ship')
+  cells.forEach(cell => shipToClear(cell))
+
+  shot()
+}
+
+function aim(battlefields) {
+  const clear = document.querySelectorAll('i.far.fa-square')
 
   battlefields.addEventListener('mouseover', e => {
     if (e.target.tagName === 'I') {
@@ -91,34 +136,62 @@ function changeCell() {
       e.target.classList.add('far')
       e.target.classList.add('fa-square')
 
+      // if (e.target.parentElement.classList.contains('btn-warning')) {
       e.target.parentElement.classList.remove('btn-warning')
       e.target.parentElement.classList.add('btn-light')
+      // }
     }
   })
+}
 
-  // container.onmouseover = container.onmouseout = handler
+function addShip() {
+  const battlefields = document.getElementById('battlefields')
 
-  // function handler(event) {
-  //   function str(el) {
-  //     if (!el) return 'null'
-  //     return el.className || el.tagName
-  //   }
+  battlefields.addEventListener('click', e => {
+    if (e.target.tagName === 'I') {
+      e.target.classList.remove('far')
+      e.target.classList.remove('fa-square')
+      e.target.classList.remove('fa-2x')
+      e.target.classList.remove('clear')
 
-  //   log.value +=
-  //     event.type +
-  //     ':  ' +
-  //     'target=' +
-  //     str(event.target) +
-  //     ',  relatedTarget=' +
-  //     str(event.relatedTarget) +
-  //     '\n'
-  //   log.scrollTop = log.scrollHeight
+      e.target.classList.add('fas')
+      e.target.classList.add('fa-ship')
+      e.target.classList.add('fa-1x')
 
-  //   if (event.type == 'mouseover') {
-  //     event.target.style.background = 'pink'
-  //   }
-  //   if (event.type == 'mouseout') {
-  //     event.target.style.background = ''
-  //   }
-  // }
+      store.mapId = e.target.id
+    }
+  })
+}
+
+function addDelBtn(elem, tf) {
+  if (tf) {
+    const addShipsBtn = document.createElement('button')
+
+    addShipsBtn.classList.add('btn')
+    addShipsBtn.classList.add('btn-success')
+    addShipsBtn.classList.add('placed')
+    addShipsBtn.textContent = 'Готово'
+
+    elem.push(addShipsBtn)
+  }
+  if (!tf) {
+    elem.remove()
+  }
+}
+
+function shipToClear(elem) {
+  elem.classList.add('far')
+  elem.classList.add('fa-square')
+  elem.classList.add('fa-2x')
+  elem.classList.add('clear')
+
+  elem.classList.remove('fas')
+  elem.classList.remove('fa-ship')
+  elem.classList.remove('fa-1x')
+}
+
+function shot(id) {
+  const battlefields = document.getElementById('battlefields')
+
+  aim(battlefields)
 }
